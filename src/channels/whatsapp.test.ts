@@ -459,21 +459,39 @@ describe('WhatsAppChannel', () => {
     });
 
     it.each([
-      { desc: 'with caption', id: 'msg-6', caption: 'Check this photo', mime: 'image/jpeg',
-        expected: 'Check this photo\n[Image: /workspace/group/images/msg-6.jpeg]' },
-      { desc: 'without caption', id: 'msg-img-nocap', caption: undefined, mime: 'image/png',
-        expected: '[Image: /workspace/group/images/msg-img-nocap.png]' },
+      {
+        desc: 'with caption',
+        id: 'msg-6',
+        caption: 'Check this photo',
+        mime: 'image/jpeg',
+        expected:
+          'Check this photo\n[Image: /workspace/group/images/msg-6.jpeg]',
+      },
+      {
+        desc: 'without caption',
+        id: 'msg-img-nocap',
+        caption: undefined,
+        mime: 'image/png',
+        expected: '[Image: /workspace/group/images/msg-img-nocap.png]',
+      },
     ])('downloads image $desc', async ({ id, caption, mime, expected }) => {
       const opts = createTestOpts();
       const channel = new WhatsAppChannel(opts);
       await connectChannel(channel);
 
-      await triggerMessages([{
-        key: { id, remoteJid: 'registered@g.us', participant: '5551234@s.whatsapp.net', fromMe: false },
-        message: { imageMessage: { caption, mimetype: mime } },
-        pushName: 'Diana',
-        messageTimestamp: Math.floor(Date.now() / 1000),
-      }]);
+      await triggerMessages([
+        {
+          key: {
+            id,
+            remoteJid: 'registered@g.us',
+            participant: '5551234@s.whatsapp.net',
+            fromMe: false,
+          },
+          message: { imageMessage: { caption, mimetype: mime } },
+          pushName: 'Diana',
+          messageTimestamp: Math.floor(Date.now() / 1000),
+        },
+      ]);
 
       expect(opts.onMessage).toHaveBeenCalledWith(
         'registered@g.us',

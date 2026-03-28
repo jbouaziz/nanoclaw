@@ -203,12 +203,23 @@ export class WhatsAppChannel implements Channel {
           const imgMsg = msg.message?.imageMessage;
           if (imgMsg) {
             try {
-              const buffer = await downloadMediaMessage(msg, 'buffer', {}, {
-                logger, reuploadRequest: this.sock.updateMediaMessage,
-              });
-              const ext = (imgMsg.mimetype || 'image/jpeg').split('/')[1] || 'jpg';
+              const buffer = await downloadMediaMessage(
+                msg,
+                'buffer',
+                {},
+                {
+                  logger,
+                  reuploadRequest: this.sock.updateMediaMessage,
+                },
+              );
+              const ext =
+                (imgMsg.mimetype || 'image/jpeg').split('/')[1] || 'jpg';
               const filename = `${msg.key.id || Date.now()}.${ext}`;
-              const imagesDir = path.join(GROUPS_DIR, groups[chatJid].folder, 'images');
+              const imagesDir = path.join(
+                GROUPS_DIR,
+                groups[chatJid].folder,
+                'images',
+              );
               fs.mkdirSync(imagesDir, { recursive: true });
               fs.writeFileSync(path.join(imagesDir, filename), buffer);
               imagePath = `/workspace/group/images/${filename}`;
