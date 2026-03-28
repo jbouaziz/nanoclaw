@@ -25,6 +25,7 @@
     "@whiskeysockets/baileys": "^6.7.16",
     "better-sqlite3": "11.10.0",
     "cron-parser": "5.5.0",
+    "openai": "^6.27.0",
     "qrcode-terminal": "^0.12.0"
   },
   "devDependencies": {
