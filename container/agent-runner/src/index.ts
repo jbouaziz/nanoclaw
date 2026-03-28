@@ -462,6 +462,7 @@ async function runQuery(
         'mcp__nanoclaw__*',
         'mcp__notion_umamy__*',
         'mcp__notion_etvoilapp__*',
+        'mcp__slack_umamy__*',
       ],
       env: sdkEnv,
       permissionMode: 'bypassPermissions',
@@ -498,6 +499,16 @@ async function runQuery(
                 'Authorization': `Bearer ${sdkEnv.NOTION_API_KEY_ETVOILAPP}`,
                 'Notion-Version': '2022-06-28',
               }),
+            },
+          },
+        } : {}),
+        ...(sdkEnv.SLACK_BOT_TOKEN_UMAMY ? {
+          slack_umamy: {
+            command: 'npx',
+            args: ['-y', '@modelcontextprotocol/server-slack'],
+            env: {
+              SLACK_BOT_TOKEN: sdkEnv.SLACK_BOT_TOKEN_UMAMY,
+              SLACK_USER_TOKEN: sdkEnv.SLACK_USER_TOKEN_UMAMY || '',
             },
           },
         } : {}),
