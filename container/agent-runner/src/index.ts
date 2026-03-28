@@ -460,6 +460,8 @@ async function runQuery(
         'TodoWrite', 'ToolSearch', 'Skill',
         'NotebookEdit',
         'mcp__nanoclaw__*',
+        'mcp__notion_umamy__*',
+        'mcp__notion_etvoilapp__*',
       ],
       env: sdkEnv,
       permissionMode: 'bypassPermissions',
@@ -475,6 +477,30 @@ async function runQuery(
             NANOCLAW_IS_MAIN: containerInput.isMain ? '1' : '0',
           },
         },
+        ...(sdkEnv.NOTION_API_KEY_UMAMY ? {
+          notion_umamy: {
+            command: 'npx',
+            args: ['-y', '@notionhq/notion-mcp-server'],
+            env: {
+              OPENAPI_MCP_HEADERS: JSON.stringify({
+                'Authorization': `Bearer ${sdkEnv.NOTION_API_KEY_UMAMY}`,
+                'Notion-Version': '2022-06-28',
+              }),
+            },
+          },
+        } : {}),
+        ...(sdkEnv.NOTION_API_KEY_ETVOILAPP ? {
+          notion_etvoilapp: {
+            command: 'npx',
+            args: ['-y', '@notionhq/notion-mcp-server'],
+            env: {
+              OPENAPI_MCP_HEADERS: JSON.stringify({
+                'Authorization': `Bearer ${sdkEnv.NOTION_API_KEY_ETVOILAPP}`,
+                'Notion-Version': '2022-06-28',
+              }),
+            },
+          },
+        } : {}),
       },
       hooks: {
         PreCompact: [{ hooks: [createPreCompactHook(containerInput.assistantName)] }],
