@@ -3,7 +3,7 @@
 
 FROM node:22-slim
 
-# Install system dependencies for Chromium
+# Install system dependencies for Chromium and PDF tools
 RUN apt-get update && apt-get install -y \
     chromium \
     fonts-liberation \
@@ -26,6 +26,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     gpg \
+    poppler-utils \
     && rm -rf /var/lib/apt/lists/* \
     && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
        | gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg \
@@ -61,6 +62,10 @@ RUN npm run build
 # Copy CLI tools and link global modules so they're resolvable from /workspace/
 COPY tools/ /workspace/tools/
 ENV NODE_PATH=/usr/local/lib/node_modules
+
+# Install pdf-reader CLI
+COPY skills/pdf-reader/pdf-reader /usr/local/bin/pdf-reader
+RUN chmod +x /usr/local/bin/pdf-reader
 
 # Create workspace directories
 RUN mkdir -p /workspace/group /workspace/global /workspace/extra /workspace/ipc/messages /workspace/ipc/tasks /workspace/ipc/input
