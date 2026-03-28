@@ -509,6 +509,7 @@ async function runQuery(
             env: {
               SLACK_BOT_TOKEN: sdkEnv.SLACK_BOT_TOKEN_UMAMY,
               SLACK_USER_TOKEN: sdkEnv.SLACK_USER_TOKEN_UMAMY || '',
+              SLACK_TEAM_ID: sdkEnv.SLACK_TEAM_ID_UMAMY || '',
             },
           },
         } : {}),
