@@ -27,7 +27,7 @@ import {
   stopContainer,
 } from './container-runtime.js';
 import { detectAuthMode } from './credential-proxy.js';
-import { readEnvFile } from './env.js';
+import { readAllEnvFile } from './env.js';
 import { validateAdditionalMounts } from './mount-security.js';
 import { RegisteredGroup } from './types.js';
 
@@ -254,10 +254,17 @@ function buildContainerArgs(
   // Pass host timezone so container's local time matches the user's
   args.push('-e', `TZ=${TIMEZONE}`);
 
-  // Pass IMAP credentials as env vars so container tools (imap-cli.js) can access them
-  const imapEnv = readEnvFile(['IMAP_HOST', 'IMAP_PORT', 'IMAP_USER', 'IMAP_PASS']);
-  for (const [key, value] of Object.entries(imapEnv)) {
-    if (value) {
+  // Pass all non-credential .env vars to the container so tools (gog, imap-cli, etc.)
+  // can access them. Credential vars (ANTHROPIC_API_KEY, CLAUDE_CODE_OAUTH_TOKEN) are
+  // excluded — they're injected by the credential proxy instead.
+  const CREDENTIAL_KEYS = new Set([
+    'ANTHROPIC_API_KEY',
+    'CLAUDE_CODE_OAUTH_TOKEN',
+    'ANTHROPIC_AUTH_TOKEN',
+  ]);
+  const toolEnv = readAllEnvFile();
+  for (const [key, value] of Object.entries(toolEnv)) {
+    if (value && !CREDENTIAL_KEYS.has(key)) {
       args.push('-e', `${key}=${value}`);
     }
   }
