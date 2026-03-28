@@ -21,9 +21,12 @@ export function stripInternalTags(text: string): string {
   return text.replace(/<internal>[\s\S]*?<\/internal>/g, '').trim();
 }
 
+const NO_RESPONSE_PATTERN = /^(\w+:\s*)?No response (requested|needed|required)\.?$/i;
+
 export function formatOutbound(rawText: string): string {
   const text = stripInternalTags(rawText);
   if (!text) return '';
+  if (NO_RESPONSE_PATTERN.test(text)) return '';
   return text;
 }
 

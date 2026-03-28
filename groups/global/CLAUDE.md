@@ -30,6 +30,10 @@ Here are the key findings from the research...
 
 Text inside `<internal>` tags is logged but not sent to the user. If you've already sent the key information via `send_message`, you can wrap the recap in `<internal>` to avoid sending it again.
 
+### When NOT to respond
+
+If a message is not addressed to you and doesn't require your input, **stay completely silent** — wrap your entire output in `<internal>` tags. Do NOT output phrases like "No response requested" or similar. Either respond with useful content, or say nothing at all.
+
 ### Sub-agents and teammates
 
 When working as a sub-agent or teammate, only use `send_message` if instructed to by the main agent.
@@ -46,6 +50,10 @@ When you learn something important:
 - Create files for structured data (e.g., `customers.md`, `preferences.md`)
 - Split files larger than 500 lines into folders
 - Keep an index in your memory for the files you create
+
+## Timezone
+
+The `gog` CLI returns timestamps in **UTC** (ending in `Z`). To convert to local time, check the "Current Time Info" section at the bottom of this prompt — it tells you the exact UTC offset right now. Apply that offset to convert. Do NOT guess or hardcode +1 or +2.
 
 ## Message Formatting
 

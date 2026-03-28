@@ -21,16 +21,23 @@ RUN apt-get update && apt-get install -y \
     libcups2 \
     libdrm2 \
     libxshmfence1 \
+    tzdata \
     curl \
     git \
-    && rm -rf /var/lib/apt/lists/*
+    gpg \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+       | gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+       > /etc/apt/sources.list.d/github-cli.list \
+    && apt-get update && apt-get install -y gh && rm -rf /var/lib/apt/lists/*
 
 # Set Chromium path for agent-browser
 ENV AGENT_BROWSER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium
 
-# Install agent-browser and claude-code globally
-RUN npm install -g agent-browser @anthropic-ai/claude-code
+# Install agent-browser, claude-code, and IMAP tools globally
+RUN npm install -g agent-browser @anthropic-ai/claude-code imapflow mailparser
 
 # Install gogcli (Google Workspace CLI) from GitHub release
 RUN curl -fsSL -L https://github.com/steipete/gogcli/releases/download/v0.11.0/gogcli_0.11.0_linux_amd64.tar.gz | tar xz -C /usr/local/bin gog
@@ -49,6 +56,10 @@ COPY agent-runner/ ./
 
 # Build TypeScript
 RUN npm run build
+
+# Copy CLI tools and link global modules so they're resolvable from /workspace/
+COPY tools/ /workspace/tools/
+ENV NODE_PATH=/usr/local/lib/node_modules
 
 # Create workspace directories
 RUN mkdir -p /workspace/group /workspace/global /workspace/extra /workspace/ipc/messages /workspace/ipc/tasks /workspace/ipc/input

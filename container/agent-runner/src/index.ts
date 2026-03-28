@@ -396,6 +396,18 @@ async function runQuery(
   let globalClaudeMd: string | undefined;
   if (!containerInput.isMain && fs.existsSync(globalClaudeMdPath)) {
     globalClaudeMd = fs.readFileSync(globalClaudeMdPath, 'utf-8');
+
+    // Inject current timezone offset so the agent knows the exact UTC offset
+    // without having to guess CET vs CEST (or any other DST transition)
+    const tz = process.env.TZ || 'UTC';
+    const now = new Date();
+    const offsetMin = -now.getTimezoneOffset(); // positive = east of UTC
+    const sign = offsetMin >= 0 ? '+' : '-';
+    const absH = Math.floor(Math.abs(offsetMin) / 60);
+    const absM = Math.abs(offsetMin) % 60;
+    const offsetStr = `UTC${sign}${absH}${absM ? `:${String(absM).padStart(2, '0')}` : ''}`;
+    const localTime = now.toLocaleString('fr-FR', { timeZone: tz, hour: '2-digit', minute: '2-digit', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    globalClaudeMd += `\n\n## Current Time Info\n\nTimezone: ${tz} (${offsetStr}). Current local time: ${localTime}.\nThe gog CLI returns UTC timestamps. To convert to local time, add ${sign}${absH} hour(s). Example: 16:00Z → ${String(16 + offsetMin / 60).padStart(2, '0')}:00 local.\nNEVER assume UTC+2 when the offset above says ${offsetStr}.\n`;
   }
 
   // Discover additional directories mounted at /workspace/extra/*
@@ -506,6 +518,15 @@ async function main(): Promise<void> {
       error: `Failed to parse input: ${err instanceof Error ? err.message : String(err)}`
     });
     process.exit(1);
+  }
+
+  // Expose IMAP credentials to process.env so Bash tools (imap-cli.js) can access them.
+  // These are user credentials, not API keys — safe to expose in the container.
+  const IMAP_ENV_VARS = ['IMAP_HOST', 'IMAP_PORT', 'IMAP_USER', 'IMAP_PASS'];
+  for (const key of IMAP_ENV_VARS) {
+    if (containerInput.secrets?.[key]) {
+      process.env[key] = containerInput.secrets[key];
+    }
   }
 
   // Build SDK env: merge secrets into process.env for the SDK only.

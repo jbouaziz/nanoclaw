@@ -55,6 +55,30 @@ systemctl --user stop nanoclaw
 systemctl --user restart nanoclaw
 ```
 
+## Local Database Access
+
+The app uses `better-sqlite3` (already in dependencies). `sqlite3` CLI is NOT installed on this machine. To query or update the database, use `npx tsx` with `better-sqlite3`:
+
+```bash
+# Read example
+npx tsx -e "
+import Database from 'better-sqlite3';
+const db = new Database('store/messages.db');
+console.log(db.prepare('SELECT * FROM registered_groups').all());
+db.close();
+"
+
+# Write example
+npx tsx -e "
+import Database from 'better-sqlite3';
+const db = new Database('store/messages.db');
+db.prepare(\"UPDATE registered_groups SET requires_trigger = 0 WHERE folder = 'groupe-name'\").run();
+db.close();
+"
+```
+
+Key tables: `messages`, `registered_groups`, `chat_metadata`, `scheduled_tasks`. See `src/db.ts` for schema and helper functions.
+
 ## Container Build Cache
 
 The container buildkit caches the build context aggressively. `--no-cache` alone does NOT invalidate COPY steps — the builder's volume retains stale files. To force a truly clean rebuild, prune the builder then re-run `./container/build.sh`.
