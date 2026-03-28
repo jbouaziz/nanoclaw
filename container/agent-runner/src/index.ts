@@ -544,14 +544,8 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  // Expose IMAP credentials to process.env so Bash tools (imap-cli.js) can access them.
-  // These are user credentials, not API keys — safe to expose in the container.
-  const IMAP_ENV_VARS = ['IMAP_HOST', 'IMAP_PORT', 'IMAP_USER', 'IMAP_PASS'];
-  for (const key of IMAP_ENV_VARS) {
-    if (containerInput.secrets?.[key]) {
-      process.env[key] = containerInput.secrets[key];
-    }
-  }
+  // IMAP credentials are passed as container env vars (-e flags) by the host.
+  // They are already available in process.env for Bash tools (imap-cli.js).
 
   // Credentials are injected by the host's credential proxy via ANTHROPIC_BASE_URL.
   // No real secrets exist in the container environment.
