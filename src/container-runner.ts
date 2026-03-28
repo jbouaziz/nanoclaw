@@ -27,6 +27,7 @@ import {
   stopContainer,
 } from './container-runtime.js';
 import { detectAuthMode } from './credential-proxy.js';
+import { readEnvFile } from './env.js';
 import { validateAdditionalMounts } from './mount-security.js';
 import { RegisteredGroup } from './types.js';
 
@@ -254,9 +255,10 @@ function buildContainerArgs(
   args.push('-e', `TZ=${TIMEZONE}`);
 
   // Pass IMAP credentials as env vars so container tools (imap-cli.js) can access them
-  for (const key of ['IMAP_HOST', 'IMAP_PORT', 'IMAP_USER', 'IMAP_PASS']) {
-    if (process.env[key]) {
-      args.push('-e', `${key}=${process.env[key]}`);
+  const imapEnv = readEnvFile(['IMAP_HOST', 'IMAP_PORT', 'IMAP_USER', 'IMAP_PASS']);
+  for (const [key, value] of Object.entries(imapEnv)) {
+    if (value) {
+      args.push('-e', `${key}=${value}`);
     }
   }
 
